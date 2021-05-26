@@ -7,12 +7,10 @@ function getTotalAccountsCount(accounts) {
 }
 
 function getBooksBorrowedCount(books) {
-  let borrowed = 0;
-    books.forEach((book) => {
-      if(book.borrows[0].returned === false) { ++borrowed; }
-  })
-  return borrowed;
-  }
+  return books.reduce((acc, book) => {
+    return acc + book.borrows.filter(notReturned => notReturned.returned === false).length;
+  }, 0);
+}
 
 
   function getMostCommonGenres(books) {
@@ -45,20 +43,20 @@ function getMostPopularBooks(books) {
 
 
 function getMostPopularAuthors(books, authors) {
+  function getAuthorById(authors, authorId) { return authors.find((author) => author.id === authorId); }
+    const bookAuthors = [];
+    books.forEach((book) => {
+      const match = bookAuthors.find((author) => author.id === book.authorId);
+        if (match) { match.count += book.borrows.length; }
+        else {
+          const writer = getAuthorById(authors, book.authorId);
+          const count = book.borrows.length;
+            bookAuthors.push({ name: `${writer.name.first} ${writer.name.last}`, count, }); } });
+              let result = bookAuthors.sort((authorA, authorB) => authorA.count < authorB.count ? 1 : -1 );
+    result = result.slice(0, 5);
+    return result;
+  }
 
-function getAuthorById(authors, authorId) { return authors.find((author) => author.id === authorId); }
-
-const bookAuthors = [];
-books.forEach((book) => {
-  const match = bookAuthors.find((author) => author.id === book.authorId);
-    if (match) { match.count += book.borrows.length; }
-      else { const writer = getAuthorById(authors, book.authorId);
-  const count = book.borrows.length;
-    bookAuthors.push({ name: `${writer.name.first} ${writer.name.last}`, count, }); } });
-      let result = bookAuthors.sort((authorA, authorB) => authorA.count < authorB.count ? 1 : -1 );
-        result = result.slice(0, 5);
-return result;
-}
 
 
 
